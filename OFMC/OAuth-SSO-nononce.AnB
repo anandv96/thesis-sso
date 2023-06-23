@@ -1,0 +1,33 @@
+Protocol: OAuth
+
+Types: Agent U, RP, idp;
+       Number STATE;
+       Function h, pw, cpw, info;
+
+Knowledge: U: U, idp, RP, pw(U);
+	  idp: U, idp, RP, info(U), h(pw(U)), h(cpw(RP));
+	   RP: idp, RP, cpw(RP);
+	   
+       where RP!=U, RP!=idp, U!=idp
+Actions:
+
+[U] *->* RP  : U, RP, idp
+RP *->* [U] : STATE, RP
+
+[U] *->* idp : U, RP, idp, STATE, pw(U)
+idp *->* [U] : STATE, Code
+
+[U] *->* RP  : STATE, Code
+
+[RP]*->* idp : cpw(RP), Code
+idp *->* [RP]: Token
+
+[RP]*->* idp : Token
+idp *->* [RP]: U, info(U), RP, idp
+
+Goals:
+
+RP authenticates idp on U, info(U), Code, Token
+Token, info(U) secret between RP, idp
+Code secret between U, RP, idp
+RP authenticates U on Code

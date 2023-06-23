@@ -1,0 +1,54 @@
+Nononce attack Jun 1:
+
+# basically the attacker gets two different alice sessions to talk to it, A1 and A2. And mixes up the login tokens from A1 and A2. So A1 info is given to RP2 and vice versa
+# not possible under proper TLS because the session keys are different
+
+
+# i intercepts message to rp and forwards it to rp itself
+(A,1) -> i: pseudonym(A),{|A,RP1,idp|}_(secChCr(pseudonym(A),RP1))
+i -> (RP1,1): pseudonym(A),{|A,RP1,idp|}_(secChCr(pseudonym(A),RP1))
+# rp responds to i with a state
+(RP1,1) -> i: {|STATE(2),RP1|}_(secChCr(RP1,pseudonym(A)))
+
+# i intercepts another message to rp and forwards that to rp itself
+(A,2) -> i: pseudonym(A),{|A,RP1,idp|}_(secChCr(pseudonym(A),RP1))
+i -> (RP1,2): pseudonym(A),{|A,RP1,idp|}_(secChCr(pseudonym(A),RP1))
+
+# i get's A2's state4 and gives it to A1. A1 is supposed to get state2
+(RP1,2) -> i:   {|STATE(4),RP1|}_(secChCr(RP1,pseudonym(A)))
+i -> (A,1):     {|STATE(4),RP1|}_(secChCr(RP1,pseudonym(A)))
+
+# thinks it's talking to idp and sends message through i
+(A,1) -> i: pseudonym(A),{|A,RP1,idp,STATE(4),pw(A)|}_(secChCr(pseudonym(A),idp))
+i -> (idp,1): pseudonym(A),{|A,RP1,idp,STATE(4),pw(A)|}_(secChCr(pseudonym(A),idp))
+
+# idp gives state4 back to A1 with code6
+(idp,1) -> i: {|STATE(4),Code(6)|}_(secChCr(idp,pseudonym(A)))
+i -> (A,1): {|STATE(4),Code(6)|}_(secChCr(idp,pseudonym(A)))
+
+# a1 passes on code6 with state4
+(A,1) -> i: pseudonym(A),{|STATE(4),Code(6)|}_(secChCr(pseudonym(A),RP1))
+i -> (RP1,2): pseudonym(A),{|STATE(4),Code(6)|}_(secChCr(pseudonym(A),RP1))
+(RP1,2) -> i: pseudonym(RP1),{|cpw(RP1),Code(6)|}_(secChCr(pseudonym(RP1),idp))
+
+# i gives A2 the state2 that was meant for A1!
+i -> (A,2): {|STATE(2),RP1|}_(secChCr(RP1,pseudonym(A)))
+
+(A,2) -> i: pseudonym(A),{|A,RP1,idp,STATE(2),pw(A)|}_(secChCr(pseudonym(A),idp))
+i -> (idp,2): pseudonym(A),{|A,RP1,idp,STATE(2),pw(A)|}_(secChCr(pseudonym(A),idp))
+
+(idp,2) -> i: {|STATE(2),Code(10)|}_(secChCr(idp,pseudonym(A)))
+i -> (A,2): {|STATE(2),Code(10)|}_(secChCr(idp,pseudonym(A)))
+(A,2) -> i: pseudonym(A),{|STATE(2),Code(10)|}_(secChCr(pseudonym(A),RP1))
+i -> (RP1,1): pseudonym(A),{|STATE(2),Code(10)|}_(secChCr(pseudonym(A),RP1))
+(RP1,1) -> i: pseudonym(RP1),{|cpw(RP1),Code(10)|}_(secChCr(pseudonym(RP1),idp))
+i -> (idp,2): pseudonym(RP1),{|cpw(RP1),Code(10)|}_(secChCr(pseudonym(RP1),idp))
+(idp,2) -> i: {|Token(13)|}_(secChCr(idp,pseudonym(RP1)))
+i -> (RP1,1): {|Token(13)|}_(secChCr(idp,pseudonym(RP1)))
+(RP1,1) -> i: pseudonym(RP1),{|Token(13)|}_(secChCr(pseudonym(RP1),idp))
+i -> (idp,2): pseudonym(RP1),{|Token(13)|}_(secChCr(pseudonym(RP1),idp))
+(idp,2) -> i: {|A,info(A),RP1,idp|}_(secChCr(idp,pseudonym(RP1)))
+i -> (RP1,2): {|A,info(A),RP1,idp|}_(secChCr(idp,pseudonym(RP1)))
+(RP1,2) -> i: pseudonym(RP1),{|A,info(A),RP1,idp|}_(secChCr(pseudonym(RP1),idp))
+i -> (RP1,2): {|A,info(A),RP1,idp|}_(secChCr(idp,pseudonym(RP1)))
+

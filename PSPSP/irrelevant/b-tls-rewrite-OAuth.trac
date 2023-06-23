@@ -1,0 +1,274 @@
+Protocol: OAuth
+
+Enumerations:
+  hon = {a}
+  dis = {i}
+  ca = {s}
+  agent = hon ++ dis
+  idp = hon
+  TLShon = hon
+  TLSagent = agent
+  user = agent
+  rp = agent
+
+Sets:
+  dishonest/0
+  tls_step1/2
+  tls_step2/1
+  tls_step3/2
+  
+  clientSessionKeys/2
+  serverSessionKeysUnauth/1
+  secretData/2
+
+  rp_state/2
+  auth_codes/3
+  access_tokens/2
+
+
+
+Functions:
+Public
+  sign/2 crypt/2 scrypt/2 tuple/2 h/3 serverK/1 clientK/1 
+  initiateSSO/2
+  authReq/4 authResp/3 tokenReq/3 pk/1
+  tok/1 sec/1
+Private
+  cred/1 cid/1 inv/1 pw/1 ox/1 session/4
+
+Analysis:
+  tuple(X,Y) -> X,Y
+  sign(X,Y) -> Y
+  crypt(X,Y) ? inv(X) -> Y
+  scrypt(X,Y) ? X -> Y
+  initiateSSO(X,Y) -> X,Y
+  authReq(W,X,Y,Z) -> W,X,Y,Z
+  tokenReq(X,Y,Z) -> X,Y,Z
+  authResp(X,Y,Z) -> X,Y,Z
+  tok(X) -> X
+  cred(X) -> X
+  sec(X) -> X
+
+# The first protocol
+Transactions of tls:
+
+initialKnowledge2'(B:dis)
+* send inv(pk(B))
+  send sign(inv(pk(s)),tuple(B,pk(B))).
+
+intruderGen'()
+  new VAL
+* insert VAL dishonest
+* send ox(VAL), VAL.  
+
+clientHello(A:TLSagent,B:TLSagent)
+  new NA
+  insert NA tls_step1(A,B)
+* send NA.
+
+serverHello(B:TLSagent,NA:value)
+  receive NA
+  new NB
+  insert NB tls_step2(B)
+* send NB
+  send sign(inv(pk(s)),tuple(B,pk(B))).
+
+client_key_ex(A:TLSagent,B:TLShon,NA:value,NB:value)
+  receive NB
+  NA in tls_step1(A,B)
+  delete NA tls_step1(A,B)
+  new PMS
+* insert PMS tls_step3(A,B)
+* send ox(PMS)
+  send crypt(pk(B),PMS)
+  send scrypt(clientK(PMS),h(PMS,NA,NB)).
+
+# client_key_exD(A:TLShon,B:dis,NA:value,NB:value)
+#   receive NB
+#   NA in tls_step1(A,B)
+#   delete NA tls_step1(A,B)
+#   new PMS
+# * insert PMS tls_step3(A,B)
+# * send ox(PMS), PMS
+#   send crypt(pk(B),PMS)
+#   send scrypt(clientK(PMS),h(PMS,NA,NB)).
+  
+
+server_key_ex(B:TLShon,NA:value,NB:value,PMS:value)
+* receive ox(PMS)
+  receive crypt(pk(B),PMS)
+  receive scrypt(clientK(PMS),h(PMS,NA,NB))
+  NB in tls_step2(B)
+  delete NB tls_step2(B)
+* insert PMS serverSessionKeysUnauth(B)
+  send scrypt(serverK(PMS),h(PMS,NA,NB)).
+
+server_key_exDis(B:dis,NA:value,NB:value,PMS:value)
+* receive ox(PMS)
+  receive crypt(pk(B),PMS)
+  receive scrypt(clientK(PMS),h(PMS,NA,NB))
+  NB in tls_step2(B)
+  delete NB tls_step2(B)
+* insert PMS serverSessionKeysUnauth(B)
+* send ox(PMS), PMS
+  send scrypt(serverK(PMS),h(PMS,NA,NB)).
+
+
+clientFinishedData(A:TLShon,B:TLSagent,NA:value,NB:value,PMS:value)
+* receive ox(PMS)
+  receive scrypt(serverK(PMS),h(PMS,NA,NB))
+* PMS in tls_step3(A,B)
+* delete PMS tls_step3(A,B)
+* insert PMS clientSessionKeys(A,B).
+
+clientFinishedDataDis(A:dis,B:TLSagent,NA:value,NB:value,PMS:value)
+* receive ox(PMS)
+  receive scrypt(serverK(PMS),h(PMS,NA,NB))
+* PMS in tls_step3(A,B)
+* delete PMS tls_step3(A,B)
+* insert PMS clientSessionKeys(A,B)
+* send ox(PMS), PMS.
+
+
+### Attacks
+
+
+secrecyGoal(A:TLShon,B:TLShon,K:value)
+  receive K
+* K in clientSessionKeys(A,B)
+  attack.
+
+secrecyGoal'(A:TLShon,B:TLShon,PMS:value)
+  receive PMS
+* PMS in tls_step3(A,B)
+  attack.
+
+
+
+
+# =============================================================================
+# =============================================================================
+# The second protocol
+Transactions of sso:
+
+initialKnowledge(A:hon) 
+  send A.
+
+initialKnowledge2(B:dis)
+* send inv(pk(B))
+  send cid(B)
+  send pw(B).
+
+intruderGen()
+  new VAL
+* insert VAL dishonest
+* send ox(VAL), VAL.
+
+# user requests to init the auth process
+userRquest(A:user,B:rp,K:value)
+* K in clientSessionKeys(A,B)
+  send scrypt(clientK(K),initiateSSO(A,B)).
+  
+# rp gets users request
+# rp asks user to go to idp
+rpRedirectUser(A:user,B:rp,K:value)
+  receive scrypt(clientK(K),initiateSSO(A,B))
+* K in serverSessionKeysUnauth(B)
+  new RP_STATE
+  insert RP_STATE rp_state(A,B)
+  send scrypt(serverK(K),tuple(RP_STATE,cid(B))).
+
+# user gets the redirect request from rp
+# user goes to idp and enters pw
+userRedirectIdp(A:user,B:rp,K1:value,C:idp,K2:value,RP_STATE:value)
+  receive scrypt(serverK(K1),tuple(RP_STATE,cid(B)))
+* K1 in clientSessionKeys(A,B)
+* K2 in clientSessionKeys(A,C)
+  send scrypt(clientK(K2),authReq(A,cid(B),RP_STATE,pw(A))).
+
+# idp gets user credentials
+# idp gives user auth code to give to rp
+idpAuthResponse(A:user,B:rp,C:idp,K:value,RP_STATE:value)
+  receive scrypt(clientK(K),authReq(A,cid(B),RP_STATE,pw(A)))
+* K in serverSessionKeysUnauth(C)
+  new AUTH_CODE
+  insert AUTH_CODE auth_codes(A,B,C)
+  send session(A,B,C,AUTH_CODE)
+  send scrypt(serverK(K),authResp(B,AUTH_CODE,RP_STATE)).
+
+# user gets auth code from idp
+# user gives auth code to rp
+userRedirectRp(A:user, B:rp, C:idp, K1:value, K2:value, RP_STATE:value, AUTH_CODE:value)
+  receive scrypt(serverK(K1),authResp(B,AUTH_CODE,RP_STATE))
+* K1 in clientSessionKeys(A,C)
+* K2 in clientSessionKeys(A,B)
+  send scrypt(clientK(K2), authResp(B,AUTH_CODE,RP_STATE)).
+
+# rp gets auth code from user
+# rp asks idp to exchange auth code for access token
+rpRequestToken(A:user, B:rp, C:idp, K1:value, K2:value, RP_STATE:value, AUTH_CODE:value)
+  receive scrypt(clientK(K1),authResp(B,AUTH_CODE,RP_STATE))
+* K1 in serverSessionKeysUnauth(B)
+* K2 in clientSessionKeys(B,C)
+  RP_STATE in rp_state(A,B)
+  delete RP_STATE rp_state(A,B)
+  # pw acts as client secret here
+  send scrypt(clientK(K2), tokenReq(AUTH_CODE, cid(B), pw(B))).
+
+# idp gets auth code from rp
+# idp gives rp access token
+idpTokenResponse(A:user, B:rp, C:idp, K:value, AUTH_CODE:value)
+  receive scrypt(clientK(K), tokenReq(AUTH_CODE, cid(B), pw(B)))
+  receive session(A,B,C,AUTH_CODE)
+* K in serverSessionKeysUnauth(C)
+  AUTH_CODE in auth_codes(A,B,C)
+  delete AUTH_CODE auth_codes(A,B,C)
+  new ACC_TOKEN
+  insert ACC_TOKEN access_tokens(A,C)
+  send scrypt(serverK(K), tok(ACC_TOKEN)).
+    
+# rp gets access token from idp
+# rp asks idp for user details
+rpTokenExchange(A:user, B:rp, C:idp, K:value, ACC_TOKEN:value)
+  receive scrypt(serverK(K), tok(ACC_TOKEN))
+* K in clientSessionKeys(B,C)
+  send scrypt(clientK(K), tok(ACC_TOKEN)).
+
+# idp gets rp request for user details
+# idp gives rp user details
+idpResourceResponse(A:user, B:rp, C:idp, K:value, ACC_TOKEN:value)
+  receive scrypt(clientK(K), tok(ACC_TOKEN))
+* K in serverSessionKeysUnauth(C)
+  ACC_TOKEN in access_tokens(A,C)
+  delete ACC_TOKEN access_tokens(A,C)
+  send scrypt(serverK(K), cred(A)).
+
+# rp gets user details: user logged in
+# rp gives user secret info
+rpUserLogin(A:user, B:rp, C:idp, K1:value, K2:value)
+  receive scrypt(serverK(K1), cred(A))
+* K1 in clientSessionKeys(B,C)
+* K2 in clientSessionKeys(A,B)
+* K2 in serverSessionKeysUnauth(B)
+  new SECRET
+  insert SECRET secretData(A,B)
+  send scrypt(serverK(K2), sec(SECRET)).
+
+codeSecrecy(A:hon, B:hon, C:idp, CODE:value)
+  receive CODE
+  CODE in auth_codes(A,B,C)
+  attack.
+
+passwordSecrecy(B:hon)
+  receive pw(B)
+  attack.
+
+# tokenSecrecy(A:hon, C:idp, TOKEN:value)
+#   receive TOKEN
+#   TOKEN in access_tokens(A,C)
+#   attack.
+
+resourceSecrecy(A:hon, B:hon, SECRET: value)
+  receive SECRET
+  SECRET in secretData(A,B)
+  attack.

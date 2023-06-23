@@ -1,0 +1,30 @@
+Protocol: OAuth
+
+Types: Agent U, idp, RP;
+       Number state, userData;
+       Function h, pw, info;
+
+Knowledge:  U: U, idp, RP, pw(U);
+	   idp: U, idp, RP, h(pw(U)), h(pw(RP)), info(U);
+	    RP: idp, RP, state, pw(RP), userData;
+	   
+   where RP!=U, RP!=idp, U!=idp
+Actions:
+
+[U] *->* RP  : U, RP, idp
+RP *->* [U]  : RP, state
+
+[U] *->* idp : U, RP, idp, state, pw(U)
+idp *->* [U] : state, Code
+
+[U] *->* RP  : state, Code, Data
+[RP]*->* idp : pw(RP), Code, NRP
+idp *->* [RP]: U, info(U), RP, idp, NRP
+
+
+RP *->* [U]  : userData
+
+Goals:
+
+userData secret between RP, U
+RP authenticates U on Data

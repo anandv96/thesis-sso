@@ -1,0 +1,132 @@
+Jun 2 morn:
+no attack with numsess 2
+
+
+
+Jun 1:
+
+Open-Source Fixedpoint Model-Checker version 2022
+
+
+INPUT:
+   OAuth-SSO-nononce.AnB
+SUMMARY:
+  ATTACK_FOUND
+GOAL:
+  weak_auth
+BACKEND:
+  Open-Source Fixedpoint Model-Checker version 2022
+STATISTICS:
+  TIME 122653287 ms
+  parseTime 0 ms
+
+ATTACK TRACE:
+(x36,1) -> i: pseudonym(x36),{|x36,x1901,idp|}_(secChCr(pseudonym(x36),x1901))
+i -> (x1901,1): pseudonym(x36),{|x36,x1901,idp|}_(secChCr(pseudonym(x36),x1901))
+(x1901,1) -> i: {|STATE(2),x1901|}_(secChCr(x1901,pseudonym(x36)))
+(x36,2) -> i: pseudonym(x36),{|x36,x1901,idp|}_(secChCr(pseudonym(x36),x1901))
+i -> (x1901,2): pseudonym(x36),{|x36,x1901,idp|}_(secChCr(pseudonym(x36),x1901))
+(x1901,2) -> i: {|STATE(4),x1901|}_(secChCr(x1901,pseudonym(x36)))
+i -> (x36,1): {|STATE(4),x1901|}_(secChCr(x1901,pseudonym(x36)))
+(x36,1) -> i: pseudonym(x36),{|x36,x1901,idp,STATE(4),pw(x36)|}_(secChCr(pseudonym(x36),idp))
+i -> (idp,1): pseudonym(x36),{|x36,x1901,idp,STATE(4),pw(x36)|}_(secChCr(pseudonym(x36),idp))
+(idp,1) -> i: {|STATE(4),Code(6)|}_(secChCr(idp,pseudonym(x36)))
+i -> (x36,1): {|STATE(4),Code(6)|}_(secChCr(idp,pseudonym(x36)))
+(x36,1) -> i: pseudonym(x36),{|STATE(4),Code(6)|}_(secChCr(pseudonym(x36),x1901))
+i -> (x1901,2): pseudonym(x36),{|STATE(4),Code(6)|}_(secChCr(pseudonym(x36),x1901))
+(x1901,2) -> i: pseudonym(x1901),{|cpw(x1901),Code(6)|}_(secChCr(pseudonym(x1901),idp))
+i -> (x36,2): {|STATE(2),x1901|}_(secChCr(x1901,pseudonym(x36)))
+(x36,2) -> i: pseudonym(x36),{|x36,x1901,idp,STATE(2),pw(x36)|}_(secChCr(pseudonym(x36),idp))
+i -> (idp,2): pseudonym(x36),{|x36,x1901,idp,STATE(2),pw(x36)|}_(secChCr(pseudonym(x36),idp))
+(idp,2) -> i: {|STATE(2),Code(10)|}_(secChCr(idp,pseudonym(x36)))
+i -> (x36,2): {|STATE(2),Code(10)|}_(secChCr(idp,pseudonym(x36)))
+(x36,2) -> i: pseudonym(x36),{|STATE(2),Code(10)|}_(secChCr(pseudonym(x36),x1901))
+i -> (x1901,1): pseudonym(x36),{|STATE(2),Code(10)|}_(secChCr(pseudonym(x36),x1901))
+(x1901,1) -> i: pseudonym(x1901),{|cpw(x1901),Code(10)|}_(secChCr(pseudonym(x1901),idp))
+i -> (idp,2): pseudonym(x1901),{|cpw(x1901),Code(10)|}_(secChCr(pseudonym(x1901),idp))
+(idp,2) -> i: {|Token(13)|}_(secChCr(idp,pseudonym(x1901)))
+i -> (x1901,1): {|Token(13)|}_(secChCr(idp,pseudonym(x1901)))
+(x1901,1) -> i: pseudonym(x1901),{|Token(13)|}_(secChCr(pseudonym(x1901),idp))
+i -> (idp,2): pseudonym(x1901),{|Token(13)|}_(secChCr(pseudonym(x1901),idp))
+(idp,2) -> i: {|x36,info(x36),x1901,idp|}_(secChCr(idp,pseudonym(x1901)))
+i -> (x1901,2): {|x36,info(x36),x1901,idp|}_(secChCr(idp,pseudonym(x1901)))
+(x1901,2) -> i: pseudonym(x1901),{|x36,info(x36),x1901,idp|}_(secChCr(pseudonym(x1901),idp))
+i -> (x1901,2): {|x36,info(x36),x1901,idp|}_(secChCr(idp,pseudonym(x1901)))
+
+
+% Reached State:
+% 
+% request(x1901,idp,pRPidpUinfoUCodeToken,x36,info(x36),Code(6),x36,info(x36),x1901,idp,2)
+% secrets(x36,info(x36),x1901,idp,info(x36),secrecyset(x1901,2,pTokeninfoU),i)
+% contains(secrecyset(x1901,2,pTokeninfoU),x1901)
+% contains(secrecyset(x1901,2,pTokeninfoU),idp)
+% secrets(Code(6),secrecyset(x1901,2,pCode),i)
+% contains(secrecyset(x1901,2,pCode),x36)
+% contains(secrecyset(x1901,2,pCode),x1901)
+% contains(secrecyset(x1901,2,pCode),idp)
+% request(x1901,x36,pRPUCode,Code(6),2)
+% state_rRP(x1901,4,cpw(x1901),idp,x36,x36,x1901,idp,pseudonym(x36),STATE(4),STATE(4),x1901,Code(6),STATE(4),Code(6),cpw(x1901),Code(6),x36,info(x36),x1901,idp,info(x36),x36,info(x36),x1901,idp,2)
+% state_rU(x36,3,pw(x36),x1901,idp,x36,x1901,idp,STATE(2),STATE(2),x1901,x36,x1901,idp,STATE(2),pw(x36),Code(10),STATE(2),Code(10),2)
+% state_ridp(idp,3,h(cpw(x1901)),h(pw(x36)),info(x36),x1901,x36,pw(x36),STATE(2),x36,x1901,idp,STATE(2),pw(x36),pseudonym(x36),Code(10),STATE(2),Code(10),cpw(x1901),cpw(x1901),Code(10),pseudonym(x1901),Token(13),x36,info(x36),x1901,idp,2)
+% state_ridp(idp,1,h(cpw(x1901)),h(pw(x36)),info(x36),x1901,x36,pw(x36),STATE(4),x36,x1901,idp,STATE(4),pw(x36),pseudonym(x36),Code(6),STATE(4),Code(6),1)
+% state_rRP(x1901,3,cpw(x1901),idp,x36,x36,x1901,idp,pseudonym(x36),STATE(2),STATE(2),x1901,Code(10),STATE(2),Code(10),cpw(x1901),Code(10),Token(13),1)
+% state_rU(x36,3,pw(x36),x1901,idp,x36,x1901,idp,STATE(4),STATE(4),x1901,x36,x1901,idp,STATE(4),pw(x36),Code(6),STATE(4),Code(6),1)
+% witness(x36,x1901,pRPUCode,Code(6))
+% contains(secrecyset(x36,1,pCode),idp)
+% contains(secrecyset(x36,1,pCode),x1901)
+% contains(secrecyset(x36,1,pCode),x36)
+% secrets(Code(6),secrecyset(x36,1,pCode),i)
+% witness(x36,x1901,pRPUCode,Code(10))
+% contains(secrecyset(x36,2,pCode),idp)
+% contains(secrecyset(x36,2,pCode),x1901)
+% contains(secrecyset(x36,2,pCode),x36)
+% secrets(Code(10),secrecyset(x36,2,pCode),i)
+% witness(idp,x1901,pRPidpUinfoUCodeToken,x36,info(x36),Code(10),Token(13))
+% contains(secrecyset(idp,2,pCode),idp)
+% contains(secrecyset(idp,2,pCode),x1901)
+% contains(secrecyset(idp,2,pCode),x36)
+% secrets(Code(10),secrecyset(idp,2,pCode),i)
+% contains(secrecyset(idp,2,pTokeninfoU),idp)
+% contains(secrecyset(idp,2,pTokeninfoU),x1901)
+% secrets(Token(13),info(x36),secrecyset(idp,2,pTokeninfoU),i)
+
+
+older: 
+INPUT:
+   OAuth/OAuth-SSO-nononce.AnB
+SUMMARY:
+  ATTACK_FOUND
+GOAL:
+  weak_auth
+BACKEND:
+  Open-Source Fixedpoint Model-Checker version 2022
+STATISTICS:
+  TIME 51898001 ms
+  parseTime 0 ms
+
+ATTACK TRACE:
+(a,1) -> i: pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+i -> (rp,1): pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+(rp,1) -> i: {|state|}_(secChCr(rp,pseudonym(a)))
+i -> (rp,2): i,{|x405,rp,idp|}_(secChCr(i,rp))
+(rp,2) -> i: {|state|}_(secChCr(rp,i))
+(a,2) -> i: pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+i -> (a,2): {|state|}_(secChCr(rp,pseudonym(a)))
+(a,2) -> i: pseudonym(a),{|a,rp,idp,state,pw(a)|}_(secChCr(pseudonym(a),idp))
+i -> (idp,1): pseudonym(a),{|a,rp,idp,state,pw(a)|}_(secChCr(pseudonym(a),idp))
+(idp,1) -> i: {|state,Code(6)|}_(secChCr(idp,pseudonym(a)))
+i -> (a,2): {|state,Code(6)|}_(secChCr(idp,pseudonym(a)))
+(a,2) -> i: pseudonym(a),{|state,Code(6),Data(7)|}_(secChCr(pseudonym(a),rp))
+i -> (rp,1): pseudonym(a),{|state,Code(6),Data(7)|}_(secChCr(pseudonym(a),rp))
+(rp,1) -> i: pseudonym(rp),{|cpw(rp),Code(6)|}_(secChCr(pseudonym(rp),idp))
+i -> (idp,1): pseudonym(rp),{|cpw(rp),Code(6)|}_(secChCr(pseudonym(rp),idp))
+(idp,1) -> i: {|Token(9)|}_(secChCr(idp,pseudonym(rp)))
+i -> (rp,2): i,{|state,x1106,x1107|}_(secChCr(i,rp))
+(rp,2) -> i: pseudonym(rp),{|cpw(rp),x1106|}_(secChCr(pseudonym(rp),idp))
+i -> (rp,2): {|Token(9)|}_(secChCr(idp,pseudonym(rp)))
+(rp,2) -> i: pseudonym(rp),{|Token(9)|}_(secChCr(pseudonym(rp),idp))
+i -> (idp,1): pseudonym(rp),{|Token(9)|}_(secChCr(pseudonym(rp),idp))
+(idp,1) -> i: {|a,info(a),rp,idp|}_(secChCr(idp,pseudonym(rp)))
+i -> (rp,1): {|a,info(a),rp,idp|}_(secChCr(idp,pseudonym(rp)))
+(rp,1) -> i: pseudonym(rp),{|a,info(a),rp,idp|}_(secChCr(pseudonym(rp),idp))
+i -> (rp,1): {|a,info(a),rp,idp|}_(secChCr(idp,pseudonym(rp)))

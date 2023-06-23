@@ -1,0 +1,27 @@
+ATTACK TRACE:
+(a,1) -> i:  pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+
+i -> (rp,1): pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+(rp,1) -> i: {|state|}_(secChCr(rp,pseudonym(a)))
+
+i -> (rp,2): i,{|a,rp,idp|}_(secChCr(i,rp))
+(rp,2) -> i: {|state|}_(secChCr(rp,i))
+
+(a,2) -> i: pseudonym(a),{|a,rp,idp|}_(secChCr(pseudonym(a),rp))
+
+i -> (a,2): {|state|}_(secChCr(rp,pseudonym(a)))
+(a,2) -> i:   pseudonym(a),{|a,rp,idp,state,pw(a)|}_(secChCr(pseudonym(a),idp))
+i -> (idp,1): pseudonym(a),{|a,rp,idp,state,pw(a)|}_(secChCr(pseudonym(a),idp))
+(idp,1) -> i: {|state,Code(6)|}_(secChCr(idp,pseudonym(a)))
+i -> (a,2):   {|state,Code(6)|}_(secChCr(idp,pseudonym(a)))
+(a,2) -> i:   pseudonym(a),{|state,Code(6),Data(7)|}_(secChCr(pseudonym(a),rp))
+
+i -> (rp,1):  pseudonym(a),{|state,Code(6),Data(7)|}_(secChCr(pseudonym(a),rp))
+(rp,1) -> i:  pseudonym(rp),{|scc(rp),Code(6)|}_(secChCr(pseudonym(rp),idp))
+i -> (idp,1): pseudonym(rp),{|scc(rp),Code(6)|}_(secChCr(pseudonym(rp),idp))
+(idp,1) -> i: {|a,info(a),rp,idp|}_(secChCr(idp,pseudonym(rp)))
+
+i -> (rp,2):  i,{|state,x1106,x1107|}_(secChCr(i,rp))
+(rp,2) -> i:  pseudonym(rp),{|scc(rp),x1106|}_(secChCr(pseudonym(rp),idp))
+i -> (rp,2):  {|a,info(a),rp,idp|}_(secChCr(idp,pseudonym(rp)))
+

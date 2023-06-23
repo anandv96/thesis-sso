@@ -1,0 +1,63 @@
+Enumerations:
+    honest = {a,b}
+    dishon = {i}
+    agent = honest ++ dishon
+
+Sets:
+    a_challenge/2
+    b_response/2
+    nspk_used/2
+
+Functions:
+    Public crypt/2 aInit/2 bResp/2 aResp/1 pk/1
+    Private inv/1
+
+Analysis:
+    aInit(X, Y) -> X, Y
+    bResp(X, Y) -> X, Y
+    aResp(X) -> X
+    crypt(X, Y) ? inv(X) -> Y
+
+Transactions:
+
+#generateNonce()
+#    new NA
+#    send NA.
+
+
+initialKnowledgeDis(A: dishon)
+    send inv(pk(A)).
+
+aInit(A: honest, B: agent)
+    new NA
+    insert NA a_challenge(A,B)
+    send crypt(pk(B),aInit(NA,A)).
+
+bResp(A: agent, B: honest, NA: value)
+    receive crypt(pk(B),aInit(NA,A))
+    new NB
+    insert NB b_response(B,A)
+    send crypt(pk(A),bResp(NA,NB)).
+
+aResp(A: honest, B: agent, NA: value, NB: value)
+    receive crypt(pk(A),bResp(NA,NB))
+    NA in a_challenge(A,B)
+    insert NA nspk_used(A,B)
+    delete NA a_challenge(A,B)
+    send crypt(pk(B),aResp(NB)).
+
+bFinal(A: agent, B: honest, NB: value)
+    receive crypt(pk(B),aResp(NB))
+    NB in b_response(B,A)
+    delete NB b_response(B,A)
+    insert NB nspk_used(B,A).
+
+attack_naSecrecy1(A: honest, B: honest, NA: value)
+    receive NA
+    NA in a_challenge(A,B)
+    attack.
+
+attack_naSecrecy2(A: honest, B: honest, NA: value)
+    receive NA
+    NA in nspk_used(A,B)
+    attack.
